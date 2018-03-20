@@ -16,44 +16,43 @@ const { register } = require('ts-node')
 
 const fs = require('fs')
 
-let packageDirectory = path.dirname(module.parent.filename)
-
 function fileExists(file) {
   return fs.existsSync(file) && fs.statSync(file).isFile()
 }
 
-for (;;) {
-  const file = path.resolve(packageDirectory, 'package.json')
-  if (fileExists(file)) {
-    break
+function findPackageDirectory(dir) {
+  let packageDirectory = dir
+
+  for (;;) {
+    const file = path.resolve(packageDirectory, 'package.json')
+    if (fileExists(file)) {
+      break
+    }
+    const parent = path.resolve(packageDirectory, '..')
+    if (parent === packageDirectory) {
+      throw new Error('atom-ts-spec-runner could not find package directory')
+    }
+    packageDirectory = parent
   }
-  const parent = path.resolve(packageDirectory, '..')
-  if (parent === packageDirectory) {
-    throw new Error('atom-ts-spec-runner could not find package directory')
-  }
-  packageDirectory = parent
+  return packageDirectory
 }
 
-const packagejson = require(path.resolve(packageDirectory, 'package.json'))
-let project = packagejson.specTSConfig
-
-if (project == null) {
-  const specTSConfig = path.resolve(
-    packageDirectory,
-    path.join('spec', 'tsconfig.json')
-  )
+function getSpecProject(specDirectory) {
+  const packageDirectory = findPackageDirectory(specDirectory)
+  const packagejson = require(path.resolve(packageDirectory, 'package.json'))
+  let project = packagejson.specTSConfig
+  if (project != null) return project
+  const specTSConfig = path.resolve(specDirectory, 'tsconfig.json')
   const packageTSConfig = path.resolve(packageDirectory, 'tsconfig.json')
 
   if (fileExists(specTSConfig)) {
-    project = specTSConfig
+    return specTSConfig
   } else if (fileExists(packageTSConfig)) {
-    project = packageTSConfig
+    return packageTSConfig
   } else {
     throw new Error('atom-ts-spec-runner could not find spec tsconfig.json')
   }
 }
-
-register({ project })
 
 // Configure test runner and export the runner function
 const createRunner = require('atom-mocha-test-runner').createRunner
@@ -76,4 +75,12 @@ const optionalConfigurationFunction = function(mocha) {
   wspcDiv.appendChild(atom.views.getView(atom.workspace))
 }
 
-module.exports = createRunner(extraOptions, optionalConfigurationFunction)
+const runner = createRunner(extraOptions, optionalConfigurationFunction)
+
+module.exports = function(settings) {
+  const { testPaths } = settings
+  const project = getSpecProject(testPaths[0])
+  register({project})
+
+  return runner(settings)
+}
