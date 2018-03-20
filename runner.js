@@ -20,37 +20,21 @@ function fileExists(file) {
   return fs.existsSync(file) && fs.statSync(file).isFile()
 }
 
-function findPackageDirectory(dir) {
-  let packageDirectory = dir
+function findUpTheTree(start, filename) {
+  let packageDirectory = start
 
   for (;;) {
-    const file = path.resolve(packageDirectory, 'package.json')
+    const file = path.resolve(packageDirectory, filename)
     if (fileExists(file)) {
-      break
+      return file
     }
     const parent = path.resolve(packageDirectory, '..')
     if (parent === packageDirectory) {
-      throw new Error('atom-ts-spec-runner could not find package directory')
+      const msg = `atom-ts-spec-runner could not find ${filename} in ${start} or any ancestors`
+      console.log(msg)
+      throw new Error(msg)
     }
     packageDirectory = parent
-  }
-  return packageDirectory
-}
-
-function getSpecProject(specDirectory) {
-  const packageDirectory = findPackageDirectory(specDirectory)
-  const packagejson = require(path.resolve(packageDirectory, 'package.json'))
-  let project = packagejson.specTSConfig
-  if (project != null) return project
-  const specTSConfig = path.resolve(specDirectory, 'tsconfig.json')
-  const packageTSConfig = path.resolve(packageDirectory, 'tsconfig.json')
-
-  if (fileExists(specTSConfig)) {
-    return specTSConfig
-  } else if (fileExists(packageTSConfig)) {
-    return packageTSConfig
-  } else {
-    throw new Error('atom-ts-spec-runner could not find spec tsconfig.json')
   }
 }
 
@@ -79,8 +63,8 @@ const runner = createRunner(extraOptions, optionalConfigurationFunction)
 
 module.exports = function(settings) {
   const { testPaths } = settings
-  const project = getSpecProject(testPaths[0])
-  register({project})
+  const project = findUpTheTree(testPaths[0], 'tsconfig.json')
+  register({ project })
 
   return runner(settings)
 }
