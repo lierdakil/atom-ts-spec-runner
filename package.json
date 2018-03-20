@@ -1,0 +1,24 @@
+{
+  "name": "atom-ts-spec-runner",
+  "version": "1.0.0",
+  "description": "Runs TypeScript specs in Atom",
+  "main": "runner.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lierdakil/atom-ts-spec-runner.git"
+  },
+  "keywords": [
+    "atom",
+    "mocha",
+    "spec"
+  ],
+  "author": "Nikolay Yakimov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lierdakil/atom-ts-spec-runner/issues"
+  },
+  "homepage": "https://github.com/lierdakil/atom-ts-spec-runner#readme"
+}
