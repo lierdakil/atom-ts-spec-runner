@@ -14,9 +14,43 @@ if (require.extensions['.ts']) {
 // Finally, register ts-node handler
 const { register } = require('ts-node')
 
-register({
-  project: path.join(__dirname, 'tsconfig.json'),
-})
+const fs = require('fs')
+
+let packageDirectory = path.dirname(module.parent.filename)
+
+function fileExists(file) {
+  return fs.existsSync(file) && fs.statSync(file).isFile()
+}
+
+for(;;) {
+    const file = path.resolve(packageDirectory, 'package.json')
+    if (fileExists(file)) {
+        break
+    }
+    const parent = path.resolve(packageDirectory, '..')
+    if (parent === packageDirectory) {
+        throw new Error('atom-ts-spec-runner could not find package directory')
+    }
+    packageDirectory = parent
+}
+
+const packagejson = require(path.resolve(packageDirectory, 'package.json'))
+let project = packagejson.specTSConfig
+
+if (project == null) {
+  const specTSConfig = path.resolve(packageDirectory, path.join('spec', 'tsconfig.json'))
+  const packageTSConfig = path.resolve(packageDirectory, 'tsconfig.json')
+
+  if (fileExists(specTSConfig)) {
+    project = specTSConfig
+  } else if (fileExists(packageTSConfig)) {
+    project = packageTSConfig
+  } else {
+    throw new Error('atom-ts-spec-runner could not find spec tsconfig.json')
+  }
+}
+
+register({project})
 
 // Configure test runner and export the runner function
 const createRunner = require('atom-mocha-test-runner').createRunner
