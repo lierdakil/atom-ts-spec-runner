@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/lierdakil/atom-ts-spec-runner/issues"
   },
-  "homepage": "https://github.com/lierdakil/atom-ts-spec-runner#readme"
+  "homepage": "https://github.com/lierdakil/atom-ts-spec-runner#readme",
+  "dependencies": {
+    "atom-mocha-test-runner": "^1.2.0"
+  }
 }
