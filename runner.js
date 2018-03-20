@@ -22,23 +22,26 @@ function fileExists(file) {
   return fs.existsSync(file) && fs.statSync(file).isFile()
 }
 
-for(;;) {
-    const file = path.resolve(packageDirectory, 'package.json')
-    if (fileExists(file)) {
-        break
-    }
-    const parent = path.resolve(packageDirectory, '..')
-    if (parent === packageDirectory) {
-        throw new Error('atom-ts-spec-runner could not find package directory')
-    }
-    packageDirectory = parent
+for (;;) {
+  const file = path.resolve(packageDirectory, 'package.json')
+  if (fileExists(file)) {
+    break
+  }
+  const parent = path.resolve(packageDirectory, '..')
+  if (parent === packageDirectory) {
+    throw new Error('atom-ts-spec-runner could not find package directory')
+  }
+  packageDirectory = parent
 }
 
 const packagejson = require(path.resolve(packageDirectory, 'package.json'))
 let project = packagejson.specTSConfig
 
 if (project == null) {
-  const specTSConfig = path.resolve(packageDirectory, path.join('spec', 'tsconfig.json'))
+  const specTSConfig = path.resolve(
+    packageDirectory,
+    path.join('spec', 'tsconfig.json')
+  )
   const packageTSConfig = path.resolve(packageDirectory, 'tsconfig.json')
 
   if (fileExists(specTSConfig)) {
@@ -50,18 +53,18 @@ if (project == null) {
   }
 }
 
-register({project})
+register({ project })
 
 // Configure test runner and export the runner function
 const createRunner = require('atom-mocha-test-runner').createRunner
 
 const extraOptions = {
   testSuffixes: ['spec.js', 'spec.coffee', 'spec.ts'],
-  globalAtom: false,
+  globalAtom: false
 }
 
 const optionalConfigurationFunction = function(mocha) {
-  global.atom = global.buildAtomEnvironment({enablePersistence: false})
+  global.atom = global.buildAtomEnvironment({ enablePersistence: false })
   mocha.timeout(10000)
 
   const wspcDiv = document.createElement('div')
