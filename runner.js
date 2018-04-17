@@ -64,7 +64,7 @@ const runner = createRunner(extraOptions, optionalConfigurationFunction)
 module.exports = function(settings) {
   const { testPaths } = settings
   const project = findUpTheTree(testPaths[0], 'tsconfig.json')
-  register({ project })
+  register({ project, transpileOnly: true })
 
   return runner(settings)
 }
