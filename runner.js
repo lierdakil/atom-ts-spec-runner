@@ -46,17 +46,16 @@ const extraOptions = {
   globalAtom: false
 }
 
-const optionalConfigurationFunction = function(mocha) {
-  global.atom = global.buildAtomEnvironment({ enablePersistence: false })
-  mocha.timeout(10000)
+const temp = require('temp').track()
 
-  const wspcDiv = document.createElement('div')
-  wspcDiv.style.height = '30vh'
-  wspcDiv.style.width = '100vh'
-  wspcDiv.style.overflow = 'hidden'
-  document.body.appendChild(wspcDiv)
-  window.workspaceDiv = wspcDiv
-  wspcDiv.appendChild(atom.views.getView(atom.workspace))
+const optionalConfigurationFunction = function(mocha) {
+  const atomHome = temp.mkdirSync({prefix: 'atom-test-home-'})
+  global.atom = global.buildAtomEnvironment({
+    configDirPath: atomHome,
+    enablePersistence: false,
+    window, document
+  })
+  mocha.timeout(10000)
 }
 
 const runner = createRunner(extraOptions, optionalConfigurationFunction)
