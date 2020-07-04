@@ -23,6 +23,7 @@
   "homepage": "https://github.com/lierdakil/atom-ts-spec-runner#readme",
   "dependencies": {
     "atom-mocha-test-runner": "^1.2.0",
+    "temp": "*",
     "ts-node": "*",
     "typescript": "*"
   }
